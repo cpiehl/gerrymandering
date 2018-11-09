@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<title>Redistricting</title>
+		<link rel="stylesheet" href="css/default.css">
+	</head>
+	<body>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/game.js"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+		<script type="text/javascript" src="js/utilities.js"></script>
+		<script type="text/javascript" src="js/piechart.js"></script>
+
+		<div class="container">
+			<div id="tiles" class="fixed"></div>
+			<div id="status" class="flex-item">
+				<input id="mainMenuButton" type="submit" value="Main Menu"><br/>
+				<canvas id="canvas"></canvas>
+				<div id="representativesCount"><h2 id="districtLabel"></h2><br/></div>
+				<h2 id="currentTurnLabel"></h2><br/>
+				<h2 id="moveCounter"></h2><br/>
+				<span id="moveCounterLabel">moves remaining</span><br/>
+				<input id="endTurnButton" type="submit" value="End Turn">
+			</div>
+		</div>
+
+		<div class="gameMenu">
+			<h2>REDISTRICTING: The Video Game</h2>
+			<table>
+				<tr>
+					<td>Width:</td>
+					<td><input id="widthInput" type="text" name="width" value="30"></td>
+				</tr>
+				<tr>
+					<td>Height:</td>
+					<td><input id="heightInput" type="text" name="height" value="30"></td>
+				</tr>
+				<tr>
+					<td>Districts:</td>
+					<td><input id="districtsInput" type="text" name="districts" value="30"></td>
+				</tr>
+				<tr>
+					<td>Voter %:</td>
+					<td><input id="votersInput" type="text" name="voterRatio" value="30"></td>
+				</tr>
+				<tr>
+					<td># Parties:</td>
+					<td><input id="partiesInput" type="text" name="parties" value="2"></td>
+				</tr>
+				<tr>
+					<td colspan="2"><input id="menuStart" type="submit" value="Start"></td>
+				</tr>
+			</table>
+		</div>
+
+	</body>
+</html>
