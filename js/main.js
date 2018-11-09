@@ -10,15 +10,19 @@ var districts = [];
 var districtNodes = [];
 var grid = [];
 var parties = [
-	{ partyName: "red", weight: 1, districtName: "pink" },
-	{ partyName: "blue", weight: 1, districtName: "lightblue" },
-	{ partyName: "green", weight: 0.5, districtName: "lightgreen" }
+	// { partyName: "grey", weight: 0, districtName: "silver", hoverColor: "lightgrey" },
+	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral" },
+	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue" },
+	{ partyName: "green", weight: 0.5, districtName: "palegreen", hoverColor: "lightgreen" }
 ];
 var voters = [];
 var districtCounts = [];
 var isDragging = false;
 var dragStartTile = null;
 var currentMove = movesPerTurn;
+var blinkTimers = [];
+var blinkCount;
+var blinkInterval = 125;
 
 function main()
 {
@@ -26,14 +30,74 @@ function main()
 
 	updateMoveCounter();
 
+	$('#widthSlider').on('input propertychange', function(e)
+	{
+		var valueChanged = false;
+
+	    if (e.type=='propertychange') {
+	        valueChanged = e.originalEvent.propertyName=='value';
+	    } else {
+	        valueChanged = true;
+	    }
+	    if (valueChanged) {
+	        w = Number($(this).val());
+	    }
+	});
+	$('#heightSlider').on('input propertychange', function(e)
+	{
+		var valueChanged = false;
+
+	    if (e.type=='propertychange') {
+	        valueChanged = e.originalEvent.propertyName=='value';
+	    } else {
+	        valueChanged = true;
+	    }
+	    if (valueChanged) {
+	        h = Number($(this).val());
+	    }
+	});
+	$('#voterSlider').on('input propertychange', function(e)
+	{
+		var valueChanged = false;
+
+	    if (e.type=='propertychange') {
+	        valueChanged = e.originalEvent.propertyName=='value';
+	    } else {
+	        valueChanged = true;
+	    }
+	    if (valueChanged) {
+	        density = Number($(this).val()) / 100.0;
+	    }
+	});
+	$('#districtSlider').on('input propertychange', function(e)
+	{
+		var valueChanged = false;
+
+	    if (e.type=='propertychange') {
+	        valueChanged = e.originalEvent.propertyName=='value';
+	    } else {
+	        valueChanged = true;
+	    }
+	    if (valueChanged) {
+	        numberOfDistricts = Number($(this).val());
+	    }
+	});
+	$('#partySlider').on('input propertychange', function(e)
+	{
+		var valueChanged = false;
+
+	    if (e.type=='propertychange') {
+	        valueChanged = e.originalEvent.propertyName=='value';
+	    } else {
+	        valueChanged = true;
+	    }
+	    if (valueChanged) {
+	        numberOfParties = Number($(this).val());
+	    }
+	});
+
 	$('#menuStart').click( function()
 	{
-		w = Number($('#widthInput').val());
-		h = Number($('#heightInput').val());
-		density = Number($('#votersInput').val()) / 100.0;
-		numberOfDistricts = Number($('#districtsInput').val());
-		numberOfParties = Number($('#partiesInput').val());
-
 		init();
 	});
 
@@ -55,6 +119,7 @@ function init()
 {
 	$('.gameMenu').hide();
 	$('.container').show();
+
 
 	initpartycounts();
 	initboard();
@@ -110,7 +175,21 @@ function initboard()
 				.css({ float: "left" })
 				.height(size)
 				.width(size)
-				.mouseover( function(){ updateVoterCounts($(this)); })
+				.mouseover( function() {
+					var info = getTileInfo($(this));
+					var hoverColor = 'lightgrey';
+					if (info.p >= 0) hoverColor = parties[info.p].hoverColor;
+					$(this).removeClass('fadeOut').addClass('fadeIn');
+					$(this).css('background-color', hoverColor);
+					updateVoterCounts($(this));
+				})
+				.mouseleave( function() {
+					var info = getTileInfo($(this));
+					var districtName = '#EEEEEE';
+					if (info.p >= 0) districtName = parties[info.p].districtName;
+					$(this).removeClass('fadeIn').addClass('fadeOut');
+					$(this).css('background-color', districtName);
+				})
 				.mousedown( function() {
 					isDragging = false;
 					dragStartTile = $(this);
@@ -123,8 +202,9 @@ function initboard()
 					if (currentMove == 0)
 					{
 						var moveCounter = $('#moveCounter');
-						var blinkCount = 3;
-						var blinkTimer = setInterval(function()
+						blinkCount = 5;
+						blinkTimers.forEach(bt => clearInterval(bt));
+						blinkTimers.push(setInterval(function()
 						{
 							setTimeout(function()
 							{
@@ -134,10 +214,10 @@ function initboard()
 									moveCounter.show();
 									blinkCount--;
 									if (blinkCount == 0)
-										clearInterval(blinkTimer);
-								}, 500);
-							}, 500);
-						}, 1000);
+										blinkTimers.forEach(bt => clearInterval(bt));
+								}, blinkInterval);
+							}, blinkInterval);
+						}, blinkInterval * 2));
 					}
 					else if (wasDragging) {
 						var $this = $(this);

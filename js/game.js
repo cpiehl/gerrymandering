@@ -159,7 +159,6 @@ function updateVoterCounts(tile, force)
 	});
 
 	$('#districtLabel').html(districtIndex + nth(districtIndex) + ' District');
-
 }
 
 // set css background-color of whole district at once
@@ -266,6 +265,9 @@ function endTurn()
 	// reset number of moves
 	currentMove = movesPerTurn;
 	updateMoveCounter();
+
+	// stop moveCounter blinker
+	blinkTimers.forEach(bt => clearInterval(bt));
 
 	// restart game loop
 	game();
