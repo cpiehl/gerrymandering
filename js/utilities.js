@@ -87,6 +87,10 @@ function getTileInfo(tile)
 function getTileNeighbors(tile)
 {
 	var info = getTileInfo(tile);
+	return getTileNeighborsFromInfo(info);
+}
+
+function getTileNeighborsFromInfo(info) {
 	var tiles = [];
 	if (info.x > 0) tiles.push($('#' + getTileName(info.x - 1, info.y)));
 	if (info.y > 0) tiles.push($('#' + getTileName(info.x, info.y - 1)));

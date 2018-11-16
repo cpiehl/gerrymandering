@@ -2,6 +2,9 @@
 
 function game()
 {
+	undoStack = [];
+	$('#undoButton').prop("disabled", true);
+
 	var currentTurnPartyName = titleCaseWord(parties[currentTurn].partyName);
 	$('#currentTurnLabel')
 		.html(currentTurnPartyName + "'s Turn")
@@ -11,6 +14,47 @@ function game()
 	DrawDistricts();
 
 	return true;
+}
+
+function performMove(startinfo, endinfo) {
+	var d1 = startinfo.d;
+	var d2 = endinfo.d;
+	$this = $('#' + getTileName(endinfo.x, endinfo.y));
+	grid[endinfo.y][endinfo.x].district = d1;
+
+	// update district colors
+	var p1 = startinfo.p;
+	var p2 = endinfo.p;
+	$this.removeClass('district' + d2);
+	$this.addClass('district' + d1);
+
+	// update district borders
+	// updateTileBorders($this);
+	// updateTileBorders(dragStartTile);
+	updateTileBordersFromInfo(endinfo);
+	updateTileBordersFromInfo(startinfo);
+	getTileNeighborsFromInfo(endinfo).forEach(t => updateTileBorders(t));
+	// getTileNeighbors($this).forEach(t => updateTileBorders(t));
+	getTileNeighborsFromInfo(startinfo).forEach(t => updateTileBorders(t));
+
+	// update district voter counts
+	updateDistrictCounts();
+	updateRepCounts(); // piechart
+	updateVoterCounts($this, true);
+	updateMoveCounter();
+
+	$('#undoButton').prop("disabled", undoStack.length == 0);
+}
+
+function undo() {
+	if (undoStack.length > 0) {
+		var lastMove = undoStack.pop();
+		currentMove++;
+		// reverse move by swapping location but keeping party/district
+		var startinfo = { x: lastMove.endinfo.x, y: lastMove.endinfo.y, d: lastMove.startinfo.d, p: lastMove.startinfo.p };
+		var endinfo = { x: lastMove.startinfo.x, y: lastMove.startinfo.y, d: lastMove.endinfo.d, p: lastMove.endinfo.p };
+		performMove(endinfo, startinfo);
+	}
 }
 
 function DrawDistricts()
@@ -99,9 +143,16 @@ function updateRepCounts()
 	drawChart("canvas", pieData, pieColors);
 }
 
-function updateTileBorders(tile)
-{
+function updateTileBorders(tile) {
 	var info = getTileInfo(tile);
+	updateTileBordersFromInfo(info);
+}
+
+function updateTileBordersFromInfo(info)
+{
+	var tile = $('#' + getTileName(info.x, info.y));
+	// if (arg is tile)
+	// arg is tileInfo...
 	var x = info.x;
 	var y = info.y;
 	var d = info.d;

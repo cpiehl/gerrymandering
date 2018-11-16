@@ -1,5 +1,5 @@
 
-var w = 30;
+var w = 50;
 var h = 30;
 var scale = 2;
 var density = 0.3;
@@ -23,15 +23,14 @@ var currentMove = movesPerTurn;
 var blinkTimers = [];
 var blinkCount;
 var blinkInterval = 125;
+var undoStack = [];
 
-function main()
-{
+function main() {
 	$('.container').hide();
 
 	updateMoveCounter();
 
-	$('#widthSlider').on('input propertychange', function(e)
-	{
+	$('#widthSlider').on('input propertychange', function(e) {
 		var valueChanged = false;
 
 	    if (e.type=='propertychange') {
@@ -44,8 +43,7 @@ function main()
 			$('#widthLabel').html(w);
 	    }
 	});
-	$('#heightSlider').on('input propertychange', function(e)
-	{
+	$('#heightSlider').on('input propertychange', function(e) {
 		var valueChanged = false;
 
 	    if (e.type=='propertychange') {
@@ -58,8 +56,7 @@ function main()
 			$('#heightLabel').html(h);
 	    }
 	});
-	$('#voterSlider').on('input propertychange', function(e)
-	{
+	$('#voterSlider').on('input propertychange', function(e) {
 		var valueChanged = false;
 
 	    if (e.type=='propertychange') {
@@ -72,8 +69,7 @@ function main()
 			$('#votersLabel').html(Math.round(density * 100) + '%');
 	    }
 	});
-	$('#districtSlider').on('input propertychange', function(e)
-	{
+	$('#districtSlider').on('input propertychange', function(e) {
 		var valueChanged = false;
 
 	    if (e.type=='propertychange') {
@@ -86,8 +82,7 @@ function main()
 			$('#districtCountLabel').html(numberOfDistricts);
 	    }
 	});
-	$('#partySlider').on('input propertychange', function(e)
-	{
+	$('#partySlider').on('input propertychange', function(e) {
 		var valueChanged = false;
 
 	    if (e.type=='propertychange') {
@@ -101,27 +96,30 @@ function main()
 	    }
 	});
 
-	$('#menuStart').click( function()
-	{
+	$('#menuStart').click( function() {
 		init();
 	});
 
-	$('#mainMenuButton').click( function()
-	{
+	$('#mainMenuButton').click( function() {
 		window.location.reload();
 	});
 
 	$('#endTurnButton')
 		// .disable()
-		.click( function()
-		{
+		.click( function() {
 			endTurn();
 		})
 	;
+
+	$('#undoButton')
+		.click( function() {
+			undo();
+		})
+	;
+
 }
 
-function init()
-{
+function init() {
 	$('.gameMenu').hide();
 	$('.container').show();
 
@@ -264,28 +262,10 @@ function initboard()
 							}
 						});
 						if (isNeighbor && d1 != d2) {
-							grid[endinfo.y][endinfo.x].district = d1;
-
-							// update district colors
-							var p1 = startinfo.p;
-							var p2 = endinfo.p;
-							$this.removeClass('district' + d2);
-							$this.addClass('district' + d1);
-
-							// update district borders
-							updateTileBorders($this);
-							updateTileBorders(dragStartTile);
-							neighbors.forEach(t => updateTileBorders(t));
-							// getTileNeighbors($this).forEach(t => updateTileBorders(t));
-							getTileNeighbors(dragStartTile).forEach(t => updateTileBorders(t));
-
-							// update district voter counts
-							updateDistrictCounts();
-							updateRepCounts(); // piechart
-							updateVoterCounts($this, true);
+							undoStack.push({ startinfo: startinfo, endinfo: endinfo });
 
 							currentMove--;
-							updateMoveCounter();
+							performMove(startinfo, endinfo);
 						}
 					}
 					isDragging = false;
