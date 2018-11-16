@@ -101,14 +101,11 @@ function updateRepCounts()
 
 function updateTileBorders(tile)
 {
-	// var tile = $('#' + getTileName(x, y));
 	var info = getTileInfo(tile);
 	var x = info.x;
 	var y = info.y;
-	// var d = grid[y][x].district;
 	var d = info.d;
 
-	// tile.removeClass('topBorder bottomBorder leftBorder rightBorder');
 	if (y > 0 && grid[y-1][x].district != d)
 		tile.addClass('topBorder');
 	else
@@ -128,6 +125,19 @@ function updateTileBorders(tile)
 		tile.addClass('rightBorder');
 	else
 		tile.removeClass('rightBorder');
+
+	// color tiles along the borders
+	// var districtColor = '#EEEEEE';
+	// var borderColor = 'gainsboro';
+	// if (info.p >= 0) {
+	// 	borderColor = parties[info.p].borderColor;
+	// 	districtColor = parties[info.p].districtName;
+	// }
+	//
+	// if (tile.hasAnyClass('topBorder bottomBorder leftBorder rightBorder'))
+	// 	tile.css("background-color", borderColor);
+	// else
+	// 	tile.css("background-color", districtColor);
 }
 
 var mouseoverDistrict = -1;
@@ -169,7 +179,10 @@ function updateDistricts(d)
 	var p = districts[d].party;
 	if (p >= 0)
 		backgroundColor = parties[p].districtName;
-	$('.district' + d).css("background-color", backgroundColor);
+	$('.district' + d)
+		.css("background-color", backgroundColor)
+		// .removeClass("fadeIn fadeOut")
+	;
 }
 
 function updateDistrictCounts()

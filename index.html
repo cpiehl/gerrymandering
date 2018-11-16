@@ -2,6 +2,7 @@
 	<head>
 		<title>Redistricting</title>
 		<link rel="stylesheet" href="css/default.css">
+		<link rel="shortcut icon" type="image/png" href="favicon.png"/>
 	</head>
 	<body>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
@@ -12,7 +13,7 @@
 
 		<div class="container">
 			<div id="tiles" class="fixed"></div>
-			<div id="status" class="flex-item">
+			<div tabindex="-1" id="status" class="flex-item">
 				<input id="mainMenuButton" type="submit" value="Main Menu"><br/>
 				<canvas id="canvas"></canvas>
 				<div id="representativesCount"><h2 id="districtLabel"></h2><br/></div>
@@ -33,6 +34,9 @@
 							<input type="range" min="1" max="100" value="30" class="slider" id="widthSlider">
 						</div>
 					</td>
+					<td>
+						<span id="widthLabel">30</span>
+					</td>
 				</tr>
 				<tr>
 					<td>Height:</td>
@@ -40,6 +44,9 @@
 						<div class="slidecontainer">
 							<input type="range" min="1" max="100" value="30" class="slider" id="heightSlider">
 						</div>
+					</td>
+					<td>
+						<span id="heightLabel">30</span>
 					</td>
 				</tr>
 				<tr>
@@ -49,6 +56,9 @@
 							<input type="range" min="1" max="100" value="30" class="slider" id="districtSlider">
 						</div>
 					</td>
+					<td>
+						<span id="districtCountLabel">30</span>
+					</td>
 				</tr>
 				<tr>
 					<td>Voter %:</td>
@@ -57,6 +67,9 @@
 							<input type="range" min="1" max="100" value="30" class="slider" id="voterSlider">
 						</div>
 					</td>
+					<td>
+						<span id="votersLabel">30%</span>
+					</td>
 				</tr>
 				<tr>
 					<td># Parties:</td>
@@ -64,6 +77,9 @@
 						<div class="slidecontainer">
 							<input type="range" min="1" max="3" value="2" class="slider" id="partySlider">
 						</div>
+					</td>
+					<td>
+						<span id="partiesLabel">2</span>
 					</td>
 				</tr>
 				<tr>

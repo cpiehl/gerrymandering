@@ -161,6 +161,7 @@ html
 
 .gameMenu
 {
+	width: 50%;
 	text-align: center;
 	margin: 0 auto;
 	padding-bottom: 10px;
@@ -170,6 +171,10 @@ html
 .gameMenu table
 {
 	margin: 0 auto;
+}
+
+.gameMenu span {
+
 }
 
 #menuStart
@@ -235,7 +240,8 @@ html
 }
 
 .slidecontainer {
-    width: 100%; /* Width of the outside container */
+    /* width: 100%; /* Width of the outside container */ */
+	width: 300px;
 	margin: 2px auto;
 }
 
@@ -243,7 +249,8 @@ html
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
-    width: 100%; /* Full-width */
+    /* width: 100%; /* Full-width */ */
+	width: 300px;
     height: 15px; /* Specified height */
     background: #d3d3d3; /* Grey background */
     outline: none; /* Remove outline */

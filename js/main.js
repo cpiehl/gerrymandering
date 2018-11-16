@@ -1,9 +1,9 @@
 
-var w = 50;
-var h = 50;
+var w = 30;
+var h = 30;
 var scale = 2;
-var density = 0.2;
-var numberOfDistricts = 10;
+var density = 0.3;
+var numberOfDistricts = 30;
 var numberOfParties = 2;
 var movesPerTurn = 5;
 var districts = [];
@@ -11,9 +11,9 @@ var districtNodes = [];
 var grid = [];
 var parties = [
 	// { partyName: "grey", weight: 0, districtName: "silver", hoverColor: "lightgrey" },
-	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral" },
-	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue" },
-	{ partyName: "green", weight: 0.5, districtName: "palegreen", hoverColor: "lightgreen" }
+	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
+	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue", borderColor: "skyblue" },
+	{ partyName: "green", weight: 0.5, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
 ];
 var voters = [];
 var districtCounts = [];
@@ -41,6 +41,7 @@ function main()
 	    }
 	    if (valueChanged) {
 	        w = Number($(this).val());
+			$('#widthLabel').html(w);
 	    }
 	});
 	$('#heightSlider').on('input propertychange', function(e)
@@ -54,6 +55,7 @@ function main()
 	    }
 	    if (valueChanged) {
 	        h = Number($(this).val());
+			$('#heightLabel').html(h);
 	    }
 	});
 	$('#voterSlider').on('input propertychange', function(e)
@@ -67,6 +69,7 @@ function main()
 	    }
 	    if (valueChanged) {
 	        density = Number($(this).val()) / 100.0;
+			$('#votersLabel').html(Math.round(density * 100) + '%');
 	    }
 	});
 	$('#districtSlider').on('input propertychange', function(e)
@@ -80,6 +83,7 @@ function main()
 	    }
 	    if (valueChanged) {
 	        numberOfDistricts = Number($(this).val());
+			$('#districtCountLabel').html(numberOfDistricts);
 	    }
 	});
 	$('#partySlider').on('input propertychange', function(e)
@@ -93,6 +97,7 @@ function main()
 	    }
 	    if (valueChanged) {
 	        numberOfParties = Number($(this).val());
+			$('#partiesLabel').html(numberOfParties);
 	    }
 	});
 
@@ -175,13 +180,21 @@ function initboard()
 				.css({ float: "left" })
 				.height(size)
 				.width(size)
+				.addClass("fadeOut")
+				.bind('dragstart', function (event) { event.preventDefault() })
 				.mouseover( function() {
-					var info = getTileInfo($(this));
-					var hoverColor = 'lightgrey';
-					if (info.p >= 0) hoverColor = parties[info.p].hoverColor;
-					$(this).removeClass('fadeOut').addClass('fadeIn');
-					$(this).css('background-color', hoverColor);
 					updateVoterCounts($(this));
+					if ($(this).hasAnyClass('topBorder bottomBorder leftBorder rightBorder')) {
+						var info;
+						if (isDragging && dragStartTile != null)
+							info = getTileInfo(dragStartTile);
+						else
+							info = getTileInfo($(this));
+						var hoverColor = 'lightgrey';
+						if (info.p >= 0) hoverColor = parties[info.p].hoverColor;
+						$(this).removeClass('fadeOut').addClass('fadeIn');
+						$(this).css('background-color', hoverColor);
+					}
 				})
 				.mouseleave( function() {
 					var info = getTileInfo($(this));
@@ -193,12 +206,26 @@ function initboard()
 				.mousedown( function() {
 					isDragging = false;
 					dragStartTile = $(this);
+					var info = getTileInfo($(this));
+
+					if (currentMove > 0) {
+						var neighbors = getTileNeighbors(dragStartTile);
+						neighbors.forEach( function(neighbor, index) {
+							if (getTileInfo(neighbor).d != info.d) // don't add borders inside same district
+								neighbor.addClass("topBorder bottomBorder leftBorder rightBorder");
+						});
+					}
 				})
 				.mousemove( function() {
 					isDragging = true;
 				})
 				.mouseup( function() {
-				 	var wasDragging = isDragging;
+					var neighbors = arrayMerge(getTileNeighbors(dragStartTile), getTileNeighbors($(this)));
+					neighbors.forEach( function(neighbor, index) {
+						updateTileBorders(neighbor);
+					});
+
+					var wasDragging = isDragging;
 					if (currentMove == 0)
 					{
 						var moveCounter = $('#moveCounter');
@@ -223,49 +250,47 @@ function initboard()
 						var $this = $(this);
 						var startinfo = getTileInfo(dragStartTile);
 						var endinfo = getTileInfo($this);
-
-						if (Math.abs(startinfo.x - endinfo.x) > 1 || Math.abs(startinfo.y - endinfo.y) > 1)
-							return;
-
-						// var d1 = grid[startinfo.y][startinfo.x].district;
-						// var d2 = grid[endinfo.y][endinfo.x].district;
 						var d1 = startinfo.d;
 						var d2 = endinfo.d;
 
-						if (d1 == d2) return;
-						grid[endinfo.y][endinfo.x].district = d1;
+						// only allow expanding to directly adjacent tiles
+						var neighbors = getTileNeighbors($this);
+						var isNeighbor = false;
+						neighbors.forEach( function(neighbor, index) {
+							var neighborInfo = getTileInfo(neighbor);
+							if (neighborInfo.x == startinfo.x && neighborInfo.y == startinfo.y) {
+								isNeighbor = true;
+								return;
+							}
+						});
+						if (isNeighbor && d1 != d2) {
+							grid[endinfo.y][endinfo.x].district = d1;
 
-						// update district colors
-						// var p1 = districts[d1].party >= 0 ? parties[districts[d1].party].districtName : 'multipartisan';
-						// var p2 = districts[d2].party >= 0 ? parties[districts[d2].party].districtName : 'multipartisan';
-						var p1 = startinfo.p;
-						var p2 = endinfo.p;
-						// $(this).removeClass();
-						// $(this).removeClass(p2);
-						// $(this).addClass(p1);
-						// $(this).attr("class", 'district' + d1);
-						$this.removeClass('district' + d2);
-						$this.addClass('district' + d1);
+							// update district colors
+							var p1 = startinfo.p;
+							var p2 = endinfo.p;
+							$this.removeClass('district' + d2);
+							$this.addClass('district' + d1);
 
-						// update district borders
-						getTileNeighbors($this).forEach(t => updateTileBorders(t));
-						getTileNeighbors(dragStartTile).forEach(t => updateTileBorders(t));
+							// update district borders
+							updateTileBorders($this);
+							updateTileBorders(dragStartTile);
+							neighbors.forEach(t => updateTileBorders(t));
+							// getTileNeighbors($this).forEach(t => updateTileBorders(t));
+							getTileNeighbors(dragStartTile).forEach(t => updateTileBorders(t));
 
-						// update district voter counts
-						updateDistrictCounts();
-						updateRepCounts(); // piechart
-						// updateVoterCounts(dragStartTile, true);
-						// alert('updateVoterCounts');
-						updateVoterCounts($this, true);
+							// update district voter counts
+							updateDistrictCounts();
+							updateRepCounts(); // piechart
+							updateVoterCounts($this, true);
 
-						currentMove--;
-						updateMoveCounter();
+							currentMove--;
+							updateMoveCounter();
+						}
 					}
 					isDragging = false;
 					dragStartTile = null;
-
 				})
-				// .click( function() { tileClick($(this)); })
 			;
 
 			s.append(tile);

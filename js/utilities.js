@@ -107,3 +107,21 @@ function getDistrictName(pIndex)
 	if (pIndex == -1) return 'multipartisan';
 	return parties[pIndex].districtName;
 }
+
+$.fn.hasAnyClass = function() {
+    for (var i = 0; i < arguments.length; i++) {
+        var classes = arguments[i].split(" ");
+        for (var j = 0; j < classes.length; j++) {
+            if (this.hasClass(classes[j])) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function arrayMerge(a, b) {
+	return a.concat(b.filter(function (item) {
+	    return a.indexOf(item) < 0;
+	}));
+}
