@@ -1,3 +1,3 @@
 # gerrymandering
 
-https://htmlpreview.github.io/?https://github.com/cpiehl/gerrymandering/blob/master/index.html
+https://cpiehl.github.io/gerrymandering/
