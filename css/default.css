@@ -102,9 +102,13 @@ html
 	padding: 0px;
 }
 
-#tiles div
+#tiles > section > div
 {
 	border: 1px solid white;
+}
+
+.voter {
+	margin: 3px 0 0 3px;
 }
 
 #tiles div.fadeIn
@@ -136,22 +140,30 @@ html
 
 .topBorder
 {
-	border-top: 1px solid black !important;
+	border-top-width: 1px;
+	border-top-style: solid !important;
+	border-top-color: black !important;
 }
 
 .bottomBorder
 {
-	border-bottom: 1px solid black !important;
+	border-bottom-width: 1px;
+	border-bottom-style: solid !important;
+	border-bottom-color: black !important;
 }
 
 .leftBorder
 {
-	border-left: 1px solid black !important;
+	border-left-width: 1px;
+	border-left-style: solid !important;
+	border-left-color: black !important;
 }
 
 .rightBorder
 {
-	border-right: 1px solid black !important;
+	border-right-width: 1px;
+	border-right-style: solid !important;
+	border-right-color: black !important;
 }
 
 .container
@@ -173,9 +185,9 @@ html
 	margin: 0 auto;
 }
 
-.gameMenu span {
+/* .gameMenu span {
 
-}
+} */
 
 #menuStart
 {
@@ -249,7 +261,6 @@ html
 }
 
 .slidecontainer {
-    /* width: 100%; /* Width of the outside container */ */
 	width: 300px;
 	margin: 2px auto;
 }
@@ -258,7 +269,7 @@ html
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
-    /* width: 100%; /* Full-width */ */
+    /* width: 100%; // Full-width */
 	width: 300px;
     height: 15px; /* Specified height */
     background: #d3d3d3; /* Grey background */
@@ -290,3 +301,42 @@ html
     background: #4CAF50; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
+
+#bigbrother {
+	text-align: center;
+	letter-spacing: 20px;
+}
+
+#bigbrother > h1 {
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.topOutline {
+	border-top-width: 3px !important;
+}
+.bottomOutline {
+	border-bottom-width: 3px !important;
+}
+.leftOutline {
+	border-left-width: 3px !important;
+}
+.rightOutline {
+	border-right-width: 3px !important;
+}
+
+/* .outline.topBorder {
+	margin-top: 3px !important;
+}
+
+.outline.bottomBorder {
+	margin-bottom: 3px !important;
+}
+
+.outline.leftBorder {
+	margin-left: 3px !important;
+}
+
+.outline.rightBorder {
+	margin-right: 3px !important;
+} */

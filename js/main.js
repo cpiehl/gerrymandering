@@ -6,6 +6,7 @@ var density = 0.3;
 var numberOfDistricts = 30;
 var numberOfParties = 2;
 var movesPerTurn = 5;
+var outlineWidth = 3;
 var districts = [];
 var districtNodes = [];
 var grid = [];
@@ -13,12 +14,13 @@ var parties = [
 	// { partyName: "grey", weight: 0, districtName: "silver", hoverColor: "lightgrey" },
 	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
 	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue", borderColor: "skyblue" },
-	{ partyName: "green", weight: 0.5, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
+	{ partyName: "green", weight: 0.33, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
 ];
 var voters = [];
 var districtCounts = [];
 var isDragging = false;
 var dragStartTile = null;
+var mouseoverDistrict = -1;
 var currentMove = movesPerTurn;
 var blinkTimers = [];
 var blinkCount;
@@ -105,7 +107,6 @@ function main() {
 	});
 
 	$('#endTurnButton')
-		// .disable()
 		.click( function() {
 			endTurn();
 		})
@@ -123,27 +124,28 @@ function init() {
 	$('.gameMenu').hide();
 	$('.container').show();
 
+	if (numberOfParties == 1) {
+		$("body").prepend('<div id="bigbrother"><h1>BIG BROTHER IS WATCHING</h1></div>');
+		// need to shrink window.innerHeight by $('#bigbrother').height()
+	}
 
 	initpartycounts();
 	initboard();
 	initnodes(numberOfDistricts);
 	initvoters(density);
-	// updateVoterCounts($(getTileName(0,0)));
 
 	CalculateDistricts();
 	game();
 }
 
-function drawChart(canvasId, pieData, pieColors)
-{
+function drawChart(canvasId, pieData, pieColors) {
 	var myCanvas = document.getElementById(canvasId);
 	myCanvas.width = 100;
 	myCanvas.height = 100;
 
 	var ctx = myCanvas.getContext("2d");
 
-	var myPiechart = new Piechart(
-	{
+	var myPiechart = new Piechart({
 		canvas:myCanvas,
 		data:pieData,
 		colors:pieColors,
@@ -153,16 +155,14 @@ function drawChart(canvasId, pieData, pieColors)
 	myPiechart.draw();
 }
 
-function initboard()
-{
+function initboard() {
 	var width = window.innerWidth / (w + 3);
 	var height = window.innerHeight / (h + 3);
 	var size = width < height ? width : height;
 
  	grid = [];
 	var c = $('#tiles');
-	for (var y = 0; y < h; y++)
-	{
+	for (var y = 0; y < h; y++) {
 		var s = $('<section class="row">');
 		s.height(size + 1);
 		s.css({ margin: "0 auto", display: "table" });
@@ -170,8 +170,7 @@ function initboard()
 
 		grid[y] = [];
 
-		for (var x = 0; x < w; x++)
-		{
+		for (var x = 0; x < w; x++)	{
 			var tile = $('<div id="' + getTileName(x, y) + '"></div>');
 
 			tile
@@ -181,13 +180,28 @@ function initboard()
 				.addClass("fadeOut")
 				.bind('dragstart', function (event) { event.preventDefault() })
 				.mouseover( function() {
-					updateVoterCounts($(this));
+					var info = getTileInfo($(this));
+					
+					// different district
+					if (mouseoverDistrict != info.d && dragStartTile == null) {
+						// set css background-color of whole district at once
+						updateDistricts(info.d);
+						updateDistricts(mouseoverDistrict);
+					
+						// thicker outline around current district
+						enableDistrictOutlines(info.d, true);
+						enableDistrictOutlines(mouseoverDistrict, false);
+
+						mouseoverDistrict = info.d;
+
+						updateVoterCounts(info.d);
+					
+					}
+
+					// hovercolor only on border tiles
 					if ($(this).hasAnyClass('topBorder bottomBorder leftBorder rightBorder')) {
-						var info;
 						if (isDragging && dragStartTile != null)
 							info = getTileInfo(dragStartTile);
-						else
-							info = getTileInfo($(this));
 						var hoverColor = 'lightgrey';
 						if (info.p >= 0) hoverColor = parties[info.p].hoverColor;
 						$(this).removeClass('fadeOut').addClass('fadeIn');
@@ -206,6 +220,7 @@ function initboard()
 					dragStartTile = $(this);
 					var info = getTileInfo($(this));
 
+					// show available moves
 					if (currentMove > 0) {
 						var neighbors = getTileNeighbors(dragStartTile);
 						neighbors.forEach( function(neighbor, index) {
@@ -218,24 +233,31 @@ function initboard()
 					isDragging = true;
 				})
 				.mouseup( function() {
-					var neighbors = arrayMerge(getTileNeighbors(dragStartTile), getTileNeighbors($(this)));
-					neighbors.forEach( function(neighbor, index) {
-						updateTileBorders(neighbor);
+					var wasDragging = isDragging;
+					var $this = $(this);
+					var startinfo = getTileInfo(dragStartTile);
+					var endinfo = getTileInfo($this);
+
+					// reset available moves borders
+					var neighborInfos = arrayMerge(getTileNeighbors(dragStartTile), getTileNeighbors($(this))).map( function(n) {
+						return getTileInfo(n);
+					});
+					neighborInfos.forEach( function(info, index) {
+						updateTileBordersFromInfo(info);
+					});
+					neighborInfos.forEach( function(info, index) {
+						if (info.d == startinfo.d)
+							enableDistrictOutlines(info.d, startinfo.d == endinfo.d);
 					});
 
-					var wasDragging = isDragging;
-					if (currentMove == 0)
-					{
+					if (currentMove == 0) {
 						var moveCounter = $('#moveCounter');
 						blinkCount = 5;
 						blinkTimers.forEach(bt => clearInterval(bt));
-						blinkTimers.push(setInterval(function()
-						{
-							setTimeout(function()
-							{
+						blinkTimers.push(setInterval(function() {
+							setTimeout(function() {
 								moveCounter.hide();
-								setTimeout(function()
-								{
+								setTimeout(function() {
 									moveCounter.show();
 									blinkCount--;
 									if (blinkCount == 0)
@@ -245,11 +267,6 @@ function initboard()
 						}, blinkInterval * 2));
 					}
 					else if (wasDragging) {
-						var $this = $(this);
-						var startinfo = getTileInfo(dragStartTile);
-						var endinfo = getTileInfo($this);
-						var d1 = startinfo.d;
-						var d2 = endinfo.d;
 
 						// only allow expanding to directly adjacent tiles
 						var neighbors = getTileNeighbors($this);
@@ -261,13 +278,18 @@ function initboard()
 								return;
 							}
 						});
-						if (isNeighbor && d1 != d2) {
+
+						if (isNeighbor && startinfo.d != endinfo.d) {
 							undoStack.push({ startinfo: startinfo, endinfo: endinfo });
 
 							currentMove--;
 							performMove(startinfo, endinfo);
+							enableDistrictOutlines(startinfo.d, true);
+							enableDistrictOutlines(endinfo.d, false);
 						}
+					
 					}
+
 					isDragging = false;
 					dragStartTile = null;
 				})
@@ -281,15 +303,13 @@ function initboard()
 	}
 }
 
-function initvoters(density)
-{
+function initvoters(density) {
 	var partyWeightSum = 0;
 	parties.forEach(p => partyWeightSum += p.weight);
 
 	// add all district nodes as voters
 	// this ensures all districts have at least one voter
-	districtNodes.forEach( function(districtNode, index)
-	{
+	districtNodes.forEach( function(districtNode, index) {
 		var x = districtNode.x;
 		var y = districtNode.y;
 		var r = Math.random() * partyWeightSum;
@@ -297,8 +317,7 @@ function initvoters(density)
 	});
 
 	var z = (w * h * density) - districtNodes.length;
-	for (var i = 0; i < z; i++)
-	{
+	for (var i = 0; i < z; i++) {
 		var x = -1, y = -1;
 		var found = voters.length == 0;
 		do {
@@ -309,10 +328,8 @@ function initvoters(density)
 			// make sure a voter doesn't aready live there
 			// (only YOU can prevent voter fraud!)
 			found = false;
-			for (var j = 0; j < voters.length; j++)
-			{
-				if (voters[j].x == x && voters[j].y == y)
-				{
+			for (var j = 0; j < voters.length; j++) {
+				if (voters[j].x == x && voters[j].y == y) {
 					found = true;
 					break;
 				}
@@ -325,15 +342,12 @@ function initvoters(density)
 	}
 }
 
-function addVoter(x, y, r)
-{
+function addVoter(x, y, r) {
 	// var color = "";
-	for (var j = 0; j < parties.length; j++)
-	{
+	for (var j = 0; j < parties.length; j++) {
 		if (r > parties[j].weight)
 			r -= parties[j].weight;
-		else
-		{
+		else {
 			// color = parties[j].name;
 			voters.push({ x: x, y: y, party:j });
 			break;
@@ -341,10 +355,8 @@ function addVoter(x, y, r)
 	}
 }
 
-function initnodes(numberOfDistricts)
-{
-	for (var i = 0; i < numberOfDistricts; i++)
-	{
+function initnodes(numberOfDistricts) {
+	for (var i = 0; i < numberOfDistricts; i++) {
 		var x = -1, y = -1;
 		var found = districtNodes.length == 0;
 		do {
@@ -354,10 +366,8 @@ function initnodes(numberOfDistricts)
 
 			// make sure no node already exists here
 			found = false;
-			for (var j = 0; j < districtNodes.length; j++)
-			{
-				if (districtNodes[j].x == x && districtNodes[j].y == y)
-				{
+			for (var j = 0; j < districtNodes.length; j++) {
+				if (districtNodes[j].x == x && districtNodes[j].y == y) {
 					found = true;
 					break;
 				}
@@ -368,12 +378,10 @@ function initnodes(numberOfDistricts)
 	}
 }
 
-function initpartycounts()
-{
+function initpartycounts() {
 	parties = parties.slice(0, numberOfParties);
 	var representativesCountDiv = $("#representativesCount");
-	parties.forEach( function(party, index)
-	{
+	parties.forEach( function(party, index) {
 		representativesCountDiv.append($('<span id="' + party.partyName + '-votercount"></span><br/>'));
 	});
 }
