@@ -79,9 +79,7 @@ function undo() {
 }
 
 function DrawDistricts() {
-	var width = window.innerWidth / (w + 3);
-	var height = window.innerHeight / (h + 3);
-	var size = width < height ? width : height;
+	var tileSize = getTileSize();
 
 	grid.forEach( function (row, y)	{
 		row.forEach( function (cell, x)	{
@@ -126,8 +124,8 @@ function DrawDistricts() {
 
 		tile.append($('<div id="' + tileName + '-voter"></div>')
 			.addClass(partyName + ' voter')
-			.height(size - 6) //
-			.width(size - 6) // - 2
+			.height(tileSize - (2 * outlineWidth)) //
+			.width(tileSize - (2 * outlineWidth)) // - 2
 		);
 	});
 
@@ -199,68 +197,14 @@ function updateVoterCounts(districtIndex) {
 }
 
 function enableDistrictOutlines(districtIndex, enable) {
-	var ow = outlineWidth - 1;
+	var dname = '.district' + districtIndex;
 	if (enable) {
-		var dname = '.district' + districtIndex;
-		$('.topBorder' + dname + ':not(.topOutline)')
-			.addClass('topOutline')
-			.each (function() {
-				$this = $(this);
-				$this.height($this.height() - ow);
-			})
-		;
-		$('.bottomBorder' + dname + ':not(.bottomOutline)')
-			.addClass('bottomOutline')
-			.each (function() {
-				$this = $(this);
-				var thisHeight = $this.height();
-				$this.height($this.height() - ow);
-			})
-		;
-		$('.leftBorder' + dname + ':not(.leftOutline)')
-			.addClass('leftOutline')
-			.each (function() {
-				$this = $(this);
-				$this.width($this.width() - ow);
-			})
-		;
-		$('.rightBorder' + dname + ':not(.rightOutline)')
-			.addClass('rightOutline')
-			.each (function() {
-				$this = $(this);
-				$this.width($this.width() - ow);
-			})
-		;
+		$('.topBorder' + dname).addClass('topOutline');
+		$('.bottomBorder' + dname).addClass('bottomOutline');
+		$('.leftBorder' + dname).addClass('leftOutline');
+		$('.rightBorder' + dname).addClass('rightOutline');
 	} else {
-		var dname = '.district' + districtIndex;
-		$('.topBorder.topOutline' + dname)
-			.removeClass('topOutline')
-			.each (function() {
-				$this = $(this);
-				$this.height($this.height() + ow);
-			})
-		;
-		$('.bottomBorder.bottomOutline' + dname)
-			.removeClass('bottomOutline')
-			.each (function() {
-				$this = $(this);
-				$this.height($this.height() + ow);
-			})
-		;
-		$('.leftBorder.leftOutline' + dname)
-			.removeClass('leftOutline')
-			.each (function() {
-				$this = $(this);
-				$this.width($this.width() + ow);
-			})
-		;
-		$('.rightBorder.rightOutline' + dname)
-			.removeClass('rightOutline')
-			.each (function() {
-				$this = $(this);
-				$this.width($this.width() + ow);
-			})
-		;
+		$(dname).removeClass('topOutline bottomOutline leftOutline rightOutline');
 	}
 }
 

@@ -105,6 +105,7 @@ html
 #tiles > section > div
 {
 	border: 1px solid white;
+	padding: 2px; /* outlineWidth - borderWidth */
 }
 
 .voter {
@@ -143,6 +144,7 @@ html
 	border-top-width: 1px;
 	border-top-style: solid !important;
 	border-top-color: black !important;
+	/* padding-top: 3px; */
 }
 
 .bottomBorder
@@ -157,6 +159,7 @@ html
 	border-left-width: 1px;
 	border-left-style: solid !important;
 	border-left-color: black !important;
+	/* padding-left: 3px; */
 }
 
 .rightBorder
@@ -314,15 +317,19 @@ html
 
 .topOutline {
 	border-top-width: 3px !important;
+	padding-top: 0px !important;
 }
 .bottomOutline {
 	border-bottom-width: 3px !important;
+	padding-bottom: 0px !important;
 }
 .leftOutline {
 	border-left-width: 3px !important;
+	padding-left: 0px !important;
 }
 .rightOutline {
 	border-right-width: 3px !important;
+	padding-right: 0px !important;
 }
 
 /* .outline.topBorder {

@@ -129,3 +129,9 @@ function arrayMerge(a, b) {
 	    return a.indexOf(item) < 0;
 	}));
 }
+
+function getTileSize() {
+	var tileWidth = ((window.innerWidth - 15) / w) - (2 * borderWidth);
+	var tileHeight = ((window.innerHeight - 15) / h) - (2 * borderWidth);
+	return (tileWidth < tileHeight ? tileWidth : tileHeight) - (2 * outlineWidth);
+}

@@ -6,6 +6,7 @@ var density = 0.3;
 var numberOfDistricts = 30;
 var numberOfParties = 2;
 var movesPerTurn = 5;
+var borderWidth = 1;
 var outlineWidth = 3;
 var districts = [];
 var districtNodes = [];
@@ -156,15 +157,13 @@ function drawChart(canvasId, pieData, pieColors) {
 }
 
 function initboard() {
-	var width = window.innerWidth / (w + 3);
-	var height = window.innerHeight / (h + 3);
-	var size = width < height ? width : height;
+	var tileSize = getTileSize();
 
  	grid = [];
 	var c = $('#tiles');
 	for (var y = 0; y < h; y++) {
 		var s = $('<section class="row">');
-		s.height(size + 1);
+		s.height(tileSize + (2 * borderWidth));
 		s.css({ margin: "0 auto", display: "table" });
 		c.append(s);
 
@@ -175,8 +174,8 @@ function initboard() {
 
 			tile
 				.css({ float: "left" })
-				.height(size)
-				.width(size)
+				.height(tileSize)
+				.width(tileSize)
 				.addClass("fadeOut")
 				.bind('dragstart', function (event) { event.preventDefault() })
 				.mouseover( function() {
@@ -195,7 +194,6 @@ function initboard() {
 						mouseoverDistrict = info.d;
 
 						updateVoterCounts(info.d);
-					
 					}
 
 					// hovercolor only on border tiles
