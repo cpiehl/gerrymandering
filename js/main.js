@@ -130,6 +130,17 @@ function init() {
 		// need to shrink window.innerHeight by $('#bigbrother').height()
 	}
 
+	$('html').keydown(function( event ) {
+		// enter or space
+		if ( event.which == 13 || event.which == 32 ) {
+		   event.preventDefault();
+		   endTurn();
+		} else if (event.which == 90 && event.ctrlKey) { // z to undo
+			event.preventDefault();
+			undo();
+		}
+	});
+
 	initpartycounts();
 	initboard();
 	initnodes(numberOfDistricts);
@@ -266,6 +277,11 @@ function initboard() {
 					}
 					else if (wasDragging) {
 
+						// var hoverColor = 'lightgrey';
+						// if (startinfo.p >= 0) hoverColor = parties[startinfo.p].hoverColor;
+						// $this.removeClass('fadeOut').addClass('fadeIn');
+						// $this.css('background-color', hoverColor);
+
 						// only allow expanding to directly adjacent tiles
 						var neighbors = getTileNeighbors($this);
 						var isNeighbor = false;
@@ -285,7 +301,6 @@ function initboard() {
 							enableDistrictOutlines(startinfo.d, true);
 							enableDistrictOutlines(endinfo.d, false);
 						}
-					
 					}
 
 					isDragging = false;

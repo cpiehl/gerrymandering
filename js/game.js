@@ -259,7 +259,6 @@ function CalculateDistricts() {
 	// crappy voronoi
 	for (var y1 = 0; y1 < h; y1++) {
 		for (var x1 = 0; x1 < w; x1++) {
-			// districtCounts[i].push([]);
 			var minDistance = w + h;
 			for (var i = 0; i < districtNodes.length; i++) {
 				var x2 = districtNodes[i].x;
@@ -268,7 +267,6 @@ function CalculateDistricts() {
 				if (d < minDistance) {
 					minDistance = d;
 					grid[y1][x1].district = i;
-					// districtCounts[i][];
 				}
 			}
 		}
