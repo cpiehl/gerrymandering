@@ -137,10 +137,9 @@ function updateRepCounts() {
 	var pieData = {};
 	var pieColors = [];
 	districts.forEach( function(district, index) {
-		if (district.party == -1 || typeof parties[district.party] === 'undefined')
-			return;
-
-		var districtPartyName = parties[district.party].partyName;
+		// if (district.party == -1 || typeof parties[district.party] === 'undefined')
+		// 	return;
+		var districtPartyName = district.party >= 0 ? parties[district.party].partyName : '#EEEEEE';
 
 		if (typeof pieData[districtPartyName] === 'undefined') {
 			pieData[districtPartyName] = 0;
