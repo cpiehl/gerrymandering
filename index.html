@@ -8,6 +8,7 @@
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/game.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
+		<script type="text/javascript" src="js/ai.js"></script>
 		<script type="text/javascript" src="js/utilities.js"></script>
 		<script type="text/javascript" src="js/piechart.js"></script>
 
@@ -84,7 +85,14 @@
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2"><input id="menuStart" type="submit" value="Start"></td>
+					<td colspan="3">
+						<table id='menuStartButtons'>
+							<tr>
+									<td><input id="menuStartPvP" type="submit" value="vs. Player"></td>
+									<td><input id="menuStartPvE" type="submit" value="vs. Computer"></td>
+							</tr>
+						</table>
+					</td>
 				</tr>
 			</table>
 		</div>

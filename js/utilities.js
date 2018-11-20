@@ -75,7 +75,8 @@ function nth(d) {
 
 function getTileInfo(tile)
 {
-	var tileid = tile.attr('id');
+	// var tileid = tile.attr('id');
+	var tileid = tile[0].id;
 	var tileidsplit = tileid.split('-');
 	var x = Number(tileidsplit[1]);
 	var y = Number(tileidsplit[2]);
@@ -100,17 +101,36 @@ function getTileNeighborsFromInfo(info) {
 	return tiles;
 }
 
-function getPartyName(pIndex)
-{
+function getPartyName(pIndex) {
 	if (pIndex == -1) return 'multipartisan';
 	return parties[pIndex].partyName;
 }
 
-function getDistrictName(pIndex)
-{
+function getDistrictName(pIndex) {
 	if (pIndex == -1) return 'multipartisan';
 	return parties[pIndex].districtName;
 }
+
+function getVoterInfo(tile) {
+	// only two weeks and i've already created voter ids...
+	var voterid = $(tile).find('.voter')[0].id;
+	var voteridsplit = voterid.split('-');
+	var x = Number(voteridsplit[1]);
+	var y = Number(voteridsplit[2]);
+	var d = grid[y][x].district;
+	var p = voters[grid[y][x].voter].party;
+	return { x: x, y: y, d: d, p: p };
+}
+
+// function getDistrictVoters(d) {
+// 	var districtVoters = [];
+// 	for(var i = 0; i < parties.length; i++)
+// 		districtVoters.push(0);
+// 	voters.forEach( function(voter, index) {
+// 		districtVoters[voter.party]++;
+// 	});
+// 	return districtVoters;
+// }
 
 $.fn.hasAnyClass = function() {
     for (var i = 0; i < arguments.length; i++) {
@@ -122,6 +142,12 @@ $.fn.hasAnyClass = function() {
         }
     }
     return false;
+}
+
+function arrayMax(arr) {
+	return arr.reduce(function(a, b) {
+		return Math.max(a, b);
+	});
 }
 
 function arrayMerge(a, b) {

@@ -1,4 +1,5 @@
 
+var playerVsAi = true;
 var w = 50;
 var h = 30;
 var scale = 2;
@@ -13,8 +14,8 @@ var districtNodes = [];
 var grid = [];
 var parties = [
 	// { partyName: "grey", weight: 0, districtName: "silver", hoverColor: "lightgrey" },
-	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
 	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue", borderColor: "skyblue" },
+	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
 	{ partyName: "green", weight: 0.33, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
 ];
 var voters = [];
@@ -99,7 +100,13 @@ function main() {
 	    }
 	});
 
-	$('#menuStart').click( function() {
+	$('#menuStartPvP').click( function() {
+		playerVsAi = false;
+		init();
+	});
+
+	$('#menuStartPvE').click( function() {
+		playerVsAi = true;
 		init();
 	});
 
@@ -225,6 +232,7 @@ function initboard() {
 					$(this).css('background-color', districtName);
 				})
 				.mousedown( function() {
+					if (playerVsAi && currentTurn != 0) return; // prevent clicking when it's AI's turn
 					isDragging = false;
 					dragStartTile = $(this);
 					var info = getTileInfo($(this));
@@ -363,6 +371,7 @@ function addVoter(x, y, r) {
 		else {
 			// color = parties[j].name;
 			voters.push({ x: x, y: y, party:j });
+			grid[y][x].voter = voters.length - 1;
 			break;
 		}
 	}

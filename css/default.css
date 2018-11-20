@@ -192,9 +192,13 @@ html
 
 } */
 
-#menuStart
+#menuStartPvP, #menuStartPvE, #menuStartButtons
 {
 	width: 100%;
+}
+
+#menuStartButtons td {
+	width: 50%;
 }
 
 #mainMenuButton

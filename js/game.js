@@ -10,8 +10,18 @@ function game()
 		.html(currentTurnPartyName + "'s Turn")
 		.css("color", currentTurnPartyName)
 	;
-	// CalculateDistricts();
+	
 	DrawDistricts();
+
+	if (playerVsAi && currentMove > 0 && currentTurn > 0) {
+		var intervalId = setInterval(function() {
+		// while (playerVsAi && currentTurn > 0 && currentMove > 0) {
+			if (currentMove == 0 || currentTurn == 0 || !aiMove()) {
+				clearInterval(intervalId);
+				endTurn();
+			}
+		}, 1000);
+	}
 
 	return true;
 }
@@ -23,8 +33,8 @@ function performMove(startinfo, endinfo) {
 	grid[endinfo.y][endinfo.x].district = d1;
 
 	// update district colors
-	var p1 = startinfo.p;
-	var p2 = endinfo.p;
+	// var p1 = startinfo.p;
+	// var p2 = endinfo.p;
 	$this.removeClass('district' + d2);
 	$this.addClass('district' + d1);
 
@@ -37,8 +47,8 @@ function performMove(startinfo, endinfo) {
 	// update district voter counts
 	updateDistrictCounts();
 	updateRepCounts(); // piechart
-	updateVoterCounts(startinfo.d);
 	updateVoterCounts(endinfo.d);
+	updateVoterCounts(startinfo.d);
 	updateMoveCounter();
 
 	// set css background-color of whole district at once
@@ -101,7 +111,8 @@ function DrawDistricts() {
 				.css("background-color", districtName)
 			;
 
-			updateTileBorders(tile);
+			// updateTileBorders(tile);
+			updateTileBordersFromInfo({ x: x, y: y, d: d, p: p });
 		});
 	});
 
