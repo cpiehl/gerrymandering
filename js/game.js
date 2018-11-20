@@ -5,10 +5,11 @@ function game()
 	undoStack = [];
 	$('#undoButton').prop("disabled", true);
 
-	var currentTurnPartyName = titleCaseWord(parties[currentTurn].partyName);
+	var currentTurnPartyName = parties[currentTurn].partyName;
+	var currentTurnPartyColor = parties[currentTurn].partyColor;
 	$('#currentTurnLabel')
 		.html(currentTurnPartyName + "'s Turn")
-		.css("color", currentTurnPartyName)
+		.css("color", currentTurnPartyColor)
 	;
 	
 	DrawDistricts();
@@ -102,13 +103,9 @@ function DrawDistricts() {
 
 			var tile = $('#' + getTileName(x, y));
 
-			var districtName = '#EEEEEE';
-			if (p >= 0)
-				districtName = parties[p].districtName;
-
 			tile
 				.addClass('district' + d)
-				.css("background-color", districtName)
+				.css("background-color", p == -1 ? '#EEEEEE' : parties[p].districtColor)
 			;
 
 			// updateTileBorders(tile);
@@ -128,15 +125,16 @@ function DrawDistricts() {
 	voters.forEach( function (voter, index)	{
 		var x = voter.x;
 		var y = voter.y;
-		var partyName = parties[voter.party].partyName;
+		var partyColor = getPartyColor(voter.party);
 		var tileName = getTileName(x, y);
 		var tile = $('#' + tileName);
 		$('#' + tileName + '-voter').remove();
 
 		tile.append($('<div id="' + tileName + '-voter"></div>')
-			.addClass(partyName + ' voter')
+			.addClass('voter')
 			.height(tileSize - (2 * outlineWidth)) //
 			.width(tileSize - (2 * outlineWidth)) // - 2
+			.css("background-color", partyColor)
 		);
 	});
 
@@ -146,20 +144,18 @@ function DrawDistricts() {
 // currently only updates the piechart, text labels later
 function updateRepCounts() {
 	var pieData = {};
-	var pieColors = [];
 	districts.forEach( function(district, index) {
-		// if (district.party == -1 || typeof parties[district.party] === 'undefined')
-		// 	return;
-		var districtPartyName = district.party >= 0 ? parties[district.party].partyName : '#EEEEEE';
+		var districtPartyName = getPartyName(district.party);
+		var districtPartyColor = getPartyColor(district.party);
 
 		if (typeof pieData[districtPartyName] === 'undefined') {
-			pieData[districtPartyName] = 0;
-			pieColors.push(districtPartyName);
+			pieData[districtPartyName] = {}
+			pieData[districtPartyName].count = 0;
+			pieData[districtPartyName].color = districtPartyColor;
 		}
-
-		pieData[districtPartyName]++;
+		pieData[districtPartyName].count++;
 	});
-	drawChart("canvas", pieData, pieColors);
+	drawChart("canvas", pieData);
 }
 
 function updateTileBorders(tile) {
@@ -198,9 +194,7 @@ function updateVoterCounts(districtIndex) {
 		var count = 0;
 		if (typeof districtCounts[districtIndex][index] !== 'undefined')
 			count = districtCounts[districtIndex][index];
-		$('#' + party.partyName + '-votercount')
-			.html('<h1>' + count + '</h1>' + titleCaseWord(party.partyName) + ' Voters')
-		;
+		$('#party-' + index + '-votercount').html(count);
 	});
 
 	$('#districtLabel').html(districtIndex + nth(districtIndex) + ' District');
@@ -222,7 +216,7 @@ function enableDistrictOutlines(districtIndex, enable) {
 function updateDistricts(d) {
 	if (d == -1) return;
 	var p = districts[d].party;
-	$('.district' + d).css("background-color", p >= 0 ? parties[p].districtName : "#EEEEEE");
+	$('.district' + d).css("background-color", p >= 0 ? parties[p].districtColor : "#EEEEEE");
 }
 
 function updateDistrictCounts() {
@@ -300,5 +294,5 @@ function endTurn() {
 	blinkTimers.forEach(bt => clearInterval(bt));
 
 	// restart game loop
-	game();
+	return game();
 }

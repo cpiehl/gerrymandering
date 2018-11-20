@@ -6,6 +6,7 @@ var scale = 2;
 var density = 0.3;
 var numberOfDistricts = 30;
 var numberOfParties = 2;
+var numberOfPlayers = 1;
 var movesPerTurn = 5;
 var borderWidth = 1;
 var outlineWidth = 3;
@@ -14,9 +15,9 @@ var districtNodes = [];
 var grid = [];
 var parties = [
 	// { partyName: "grey", weight: 0, districtName: "silver", hoverColor: "lightgrey" },
-	{ partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue", borderColor: "skyblue" },
-	{ partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
-	{ partyName: "green", weight: 0.33, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
+	// { partyName: "blue", weight: 1, districtName: "lightblue", hoverColor: "dodgerblue", borderColor: "skyblue" },
+	// { partyName: "red", weight: 1, districtName: "pink", hoverColor: "lightcoral", borderColor: "palevioletred" },
+	// { partyName: "green", weight: 0.33, districtName: "palegreen", hoverColor: "lightgreen", borderColor: "chartreuse" }
 ];
 var voters = [];
 var districtCounts = [];
@@ -148,6 +149,8 @@ function init() {
 		}
 	});
 
+	initparties();
+
 	initpartycounts();
 	initboard();
 	initnodes(numberOfDistricts);
@@ -157,21 +160,26 @@ function init() {
 	game();
 }
 
-function drawChart(canvasId, pieData, pieColors) {
-	var myCanvas = document.getElementById(canvasId);
-	myCanvas.width = 100;
-	myCanvas.height = 100;
+function initparties() {
+	// var f = Math.floor(360 / numberOfParties);
+	for (var i = 0; i < numberOfParties; i++) {
+		var H = i / numberOfParties;
 
-	var ctx = myCanvas.getContext("2d");
+		var rgb = hsv2rgb(H, 1, 0.95);
+		var partyColor = rgb2css(rgb);
+		var n_match = ntc.name(partyColor);
+		var partyName = n_match[1].replace(/[^a-z+]+/gi, '');
+		var districtColor = rgb2css(hsv2rgb(H, 0.25, 0.95));
+		var hoverColor = rgb2css(hsv2rgb(H, 0.8, 0.9));
 
-	var myPiechart = new Piechart({
-		canvas:myCanvas,
-		data:pieData,
-		colors:pieColors,
-		doughnutHoleSize:0.75,
-		doughnutHoleColor:"lightgrey"
-	});
-	myPiechart.draw();
+		parties.push({
+			partyName: partyName,
+			partyColor: partyColor,
+			districtColor: districtColor,
+			hoverColor: hoverColor,
+			weight: 1
+		});
+	}
 }
 
 function initboard() {
@@ -226,10 +234,10 @@ function initboard() {
 				})
 				.mouseleave( function() {
 					var info = getTileInfo($(this));
-					var districtName = '#EEEEEE';
-					if (info.p >= 0) districtName = parties[info.p].districtName;
+					var districtColor = '#EEEEEE';
+					if (info.p >= 0) districtColor = parties[info.p].districtColor;
 					$(this).removeClass('fadeIn').addClass('fadeOut');
-					$(this).css('background-color', districtName);
+					$(this).css('background-color', districtColor);
 				})
 				.mousedown( function() {
 					if (playerVsAi && currentTurn != 0) return; // prevent clicking when it's AI's turn
@@ -401,11 +409,16 @@ function initnodes(numberOfDistricts) {
 }
 
 function initpartycounts() {
-	parties = parties.slice(0, numberOfParties);
+	// parties = parties.slice(0, numberOfParties);
 	var representativesCountDiv = $("#representativesCount");
+	var table = $('<table>');
 	parties.forEach( function(party, index) {
-		representativesCountDiv.append($('<span id="' + party.partyName + '-votercount"></span><br/>'));
+		var tr = $('<tr>').css('color', party.partyColor);
+		tr.append($('<td><h1 id="party-' + index + '-votercount"></h1></td>'));
+		tr.append($('<td>' + party.partyName + '</td>'));
+		table.append(tr);
 	});
+	representativesCountDiv.append(table);
 }
 
 window.onload = main;
