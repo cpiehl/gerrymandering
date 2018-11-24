@@ -1,7 +1,6 @@
 
 
-function game()
-{
+function game() {
 	undoStack = [];
 	$('#undoButton').prop("disabled", true);
 
@@ -10,14 +9,14 @@ function game()
 	$('#currentTurnLabel')
 		.html(currentTurnPartyName + "'s Turn")
 		.css("color", currentTurnPartyColor)
-	;
-	
+		;
+
 	DrawDistricts();
 
-	if (playerVsAi && currentMove > 0 && currentTurn > 0) {
-		var intervalId = setInterval(function() {
-		// while (playerVsAi && currentTurn > 0 && currentMove > 0) {
-			if (currentMove == 0 || currentTurn == 0 || !aiMove()) {
+	if (playerVsAi && currentMove > 0 && currentTurn >= numberOfPlayers) {
+		var intervalId = setInterval(function () {
+			// while (playerVsAi && currentTurn > 0 && currentMove > 0) {
+			if (currentMove == 0 || currentTurn < numberOfPlayers || !aiMove()) {
 				clearInterval(intervalId);
 				endTurn();
 			}
@@ -67,13 +66,13 @@ function undo() {
 		var endinfo = { x: lastMove.startinfo.x, y: lastMove.startinfo.y, d: lastMove.endinfo.d, p: lastMove.endinfo.p };
 
 		// reset available moves borders
-		var neighborInfos = arrayMerge(getTileNeighborsFromInfo(startinfo), getTileNeighborsFromInfo(endinfo)).map( function(n) {
+		var neighborInfos = arrayMerge(getTileNeighborsFromInfo(startinfo), getTileNeighborsFromInfo(endinfo)).map(function (n) {
 			return getTileInfo(n);
 		});
-		neighborInfos.forEach( function(info, index) {
+		neighborInfos.forEach(function (info, index) {
 			updateTileBordersFromInfo(info);
 		});
-		neighborInfos.forEach( function(info, index) {
+		neighborInfos.forEach(function (info, index) {
 			if (info.d == startinfo.d)
 				enableDistrictOutlines(info.d, startinfo.d == endinfo.d);
 		});
@@ -92,8 +91,8 @@ function undo() {
 function DrawDistricts() {
 	var tileSize = getTileSize();
 
-	grid.forEach( function (row, y)	{
-		row.forEach( function (cell, x)	{
+	grid.forEach(function (row, y) {
+		row.forEach(function (cell, x) {
 			var d = grid[y][x].district;
 			if (typeof districts[d] === 'undefined') {
 				debugger;
@@ -106,7 +105,7 @@ function DrawDistricts() {
 			tile
 				.addClass('district' + d)
 				.css("background-color", p == -1 ? '#EEEEEE' : parties[p].districtColor)
-			;
+				;
 
 			// updateTileBorders(tile);
 			updateTileBordersFromInfo({ x: x, y: y, d: d, p: p });
@@ -122,7 +121,7 @@ function DrawDistricts() {
 	// 	tile.addClass('districtNode');
 	// });
 
-	voters.forEach( function (voter, index)	{
+	voters.forEach(function (voter, index) {
 		var x = voter.x;
 		var y = voter.y;
 		var partyColor = getPartyColor(voter.party);
@@ -132,8 +131,8 @@ function DrawDistricts() {
 
 		tile.append($('<div id="' + tileName + '-voter"></div>')
 			.addClass('voter')
-			.height(tileSize - (2 * outlineWidth)) //
-			.width(tileSize - (2 * outlineWidth)) // - 2
+			.height(tileSize - (4 * outlineWidth)) //
+			.width(tileSize - (4 * outlineWidth)) // - 2
 			.css("background-color", partyColor)
 		);
 	});
@@ -144,7 +143,7 @@ function DrawDistricts() {
 // currently only updates the piechart, text labels later
 function updateRepCounts() {
 	var pieData = {};
-	districts.forEach( function(district, index) {
+	districts.forEach(function (district, index) {
 		var districtPartyName = getPartyName(district.party);
 		var districtPartyColor = getPartyColor(district.party);
 
@@ -169,30 +168,30 @@ function updateTileBordersFromInfo(info) {
 	var y = info.y;
 	var d = info.d;
 
-	if (y > 0 && grid[y-1][x].district != d)
+	if (y > 0 && grid[y - 1][x].district != d)
 		tile.addClass('topBorder');
 	else
 		tile.removeClass('topBorder');
-	if (y < h-1 && grid[y+1][x].district != d)
+	if (y < h - 1 && grid[y + 1][x].district != d)
 		tile.addClass('bottomBorder');
 	else
 		tile.removeClass('bottomBorder');
 
-	if (x > 0 && grid[y][x-1].district != d)
+	if (x > 0 && grid[y][x - 1].district != d)
 		tile.addClass('leftBorder');
 	else
 		tile.removeClass('leftBorder');
 
-	if (x < w-1 && grid[y][x+1].district != d)
+	if (x < w - 1 && grid[y][x + 1].district != d)
 		tile.addClass('rightBorder');
 	else
 		tile.removeClass('rightBorder');
 }
 
 function updateVoterCounts(districtIndex) {
-	parties.forEach( function(party, index)	{
+	parties.forEach(function (party, index) {
 		var count = 0;
-		if (typeof districtCounts[districtIndex][index] !== 'undefined')
+		if (typeof districtCounts[districtIndex] !== 'undefined' && typeof districtCounts[districtIndex][index] !== 'undefined')
 			count = districtCounts[districtIndex][index];
 		$('#party-' + index + '-votercount').html(count);
 	});
@@ -221,31 +220,31 @@ function updateDistricts(d) {
 
 function updateDistrictCounts() {
 	// voter count per party per district
-	districtCounts = [];
-	for (var p = 0; p < voters.length; p++)
-	{
+	// districtCounts = numberOfDistricts * [ parties.length * [] ]
+	districtCounts = Array.apply(null, Array(numberOfDistricts)).map(function (d, i) {
+		return Array.apply(null, Array(parties.length)).map(function (p, j) {
+			return 0;
+		});
+	});
+
+	for (var p = 0; p < voters.length; p++) {
 		var x = voters[p].x;
 		var y = voters[p].y;
 		var party = voters[p].party;
 		var district = grid[y][x].district;
 
-		if (typeof districtCounts[district] === 'undefined')
-			districtCounts[district] = [];
-		if (typeof districtCounts[district][party] === 'undefined')
-			districtCounts[district][party] = 0;
-
 		districtCounts[district][party]++;
 	}
 
 	districts = [];
-	for (var i = 0; i < districtCounts.length; i++)	{
+	for (var i = 0; i < districtCounts.length; i++) {
 		var biggerParty = -1;
 		var biggerPartyCount = -1;
 		if (typeof districtCounts[i] !== 'undefined') {
 			for (var j = 0; j < districtCounts[i].length; j++) {
 				if (districtCounts[i][j] == biggerPartyCount)
 					biggerParty = -1;
-				if(districtCounts[i][j] > biggerPartyCount)	{
+				if (districtCounts[i][j] > biggerPartyCount) {
 					biggerPartyCount = districtCounts[i][j];
 					biggerParty = j;
 				}

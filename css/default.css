@@ -38,9 +38,17 @@ html
 {
 	border: 1px solid white;
 	padding: 2px; /* outlineWidth - borderWidth */
+	font-size: 11px;
+}
+
+#tiles > section > div > span {
+	position: relative;
+	left: 3px;
+	top: -10px;
 }
 
 .voter {
+	padding: 3px;
 	margin: 3px 0 0 3px;
 	border-radius: 50%;
 }

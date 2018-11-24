@@ -1,5 +1,6 @@
 
 var playerVsAi = true;
+var rand = null;
 var w = 50;
 var h = 30;
 var scale = 2;
@@ -32,6 +33,13 @@ var undoStack = [];
 
 function main() {
 	$('.container').hide();
+
+	rand = xoshiro128ss(
+		Math.floor(Math.random() * (2**32 - 1)),
+		Math.floor(Math.random() * (2**32 - 1)),
+		Math.floor(Math.random() * (2**32 - 1)),
+		Math.floor(Math.random() * (2**32 - 1))
+	);
 
 	updateMoveCounter();
 
@@ -161,9 +169,9 @@ function init() {
 }
 
 function initparties() {
-	// var f = Math.floor(360 / numberOfParties);
+	var offset = 0;//rand();
 	for (var i = 0; i < numberOfParties; i++) {
-		var H = i / numberOfParties;
+		var H = ((i*1.0) / numberOfParties) + offset;
 
 		var rgb = hsv2rgb(H, 1, 0.95);
 		var partyColor = rgb2css(rgb);
@@ -292,12 +300,6 @@ function initboard() {
 						}, blinkInterval * 2));
 					}
 					else if (wasDragging) {
-
-						// var hoverColor = 'lightgrey';
-						// if (startinfo.p >= 0) hoverColor = parties[startinfo.p].hoverColor;
-						// $this.removeClass('fadeOut').addClass('fadeIn');
-						// $this.css('background-color', hoverColor);
-
 						// only allow expanding to directly adjacent tiles
 						var neighbors = getTileNeighbors($this);
 						var isNeighbor = false;
@@ -341,7 +343,7 @@ function initvoters(density) {
 	districtNodes.forEach( function(districtNode, index) {
 		var x = districtNode.x;
 		var y = districtNode.y;
-		var r = Math.random() * partyWeightSum;
+		var r = rand() * partyWeightSum;
 		addVoter(x, y, r);
 	});
 
@@ -350,7 +352,6 @@ function initvoters(density) {
 		var x = -1, y = -1;
 		var found = voters.length == 0;
 		do {
-			// alert('initvoters' + i + '/' + voters.length);
 			x = clamp(Math.floor(randn_bm(0, w * scale, 1) - w/scale), 0, w - 1);
 			y = clamp(Math.floor(randn_bm(0, h * scale, 1) - h/scale), 0, h - 1);
 
@@ -365,19 +366,17 @@ function initvoters(density) {
 			}
 		} while(found);
 
-		var r = Math.random() * partyWeightSum;
+		var r = rand() * partyWeightSum;
 
 		addVoter(x, y, r);
 	}
 }
 
 function addVoter(x, y, r) {
-	// var color = "";
 	for (var j = 0; j < parties.length; j++) {
 		if (r > parties[j].weight)
 			r -= parties[j].weight;
 		else {
-			// color = parties[j].name;
 			voters.push({ x: x, y: y, party:j });
 			grid[y][x].voter = voters.length - 1;
 			break;
@@ -390,9 +389,8 @@ function initnodes(numberOfDistricts) {
 		var x = -1, y = -1;
 		var found = districtNodes.length == 0;
 		do {
-			// alert('initnodes' + i + '/' + districtNodes.length);
-			x = clamp(Math.floor(Math.random() * w), 0, w - 1);
-			y = clamp(Math.floor(Math.random() * h), 0, h - 1);
+			x = clamp(Math.floor(rand() * w), 0, w - 1);
+			y = clamp(Math.floor(rand() * h), 0, h - 1);
 
 			// make sure no node already exists here
 			found = false;
@@ -409,7 +407,6 @@ function initnodes(numberOfDistricts) {
 }
 
 function initpartycounts() {
-	// parties = parties.slice(0, numberOfParties);
 	var representativesCountDiv = $("#representativesCount");
 	var table = $('<table>');
 	parties.forEach( function(party, index) {

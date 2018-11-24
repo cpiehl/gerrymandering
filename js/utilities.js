@@ -9,6 +9,17 @@ function sleep(ms)
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function removeAll(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+        what = a[--L];
+        while ((ax= arr.indexOf(what)) !== -1) {
+            arr.splice(ax, 1);
+        }
+    }
+    return arr;
+}
+
 function clamp(n, min, max)
 {
   return Math.min(Math.max(n, min), max);
@@ -22,8 +33,8 @@ function titleCaseWord(txt)
 function randn_bm()
 {
   var u = 0, v = 0;
-  while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-  while(v === 0) v = Math.random();
+  while(u === 0) u = rand(); //Converting [0,1) to (0,1)
+  while(v === 0) v = rand();
   let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
   num = num / 10.0 + 0.5; // Translate to 0 -> 1
   if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
@@ -33,8 +44,8 @@ function randn_bm()
 function randn_bm(min, max, skew)
 {
   var u = 0, v = 0;
-  while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-  while(v === 0) v = Math.random();
+  while(u === 0) u = rand(); //Converting [0,1) to (0,1)
+  while(v === 0) v = rand();
   let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
 
   num = num / 10.0 + 0.5; // Translate to 0 -> 1
@@ -181,6 +192,8 @@ function getVoterInfo(tile) {
 	return { x: x, y: y, d: d, p: p };
 }
 
+
+
 // function getDistrictVoters(d) {
 // 	var districtVoters = [];
 // 	for(var i = 0; i < parties.length; i++)
@@ -204,9 +217,27 @@ $.fn.hasAnyClass = function() {
 }
 
 function arrayMax(arr) {
+	if (arr.length == 0) return false;
 	return arr.reduce(function(a, b) {
 		return Math.max(a, b);
-	});
+	}, Number.MIN_SAFE_INTEGER);
+}
+
+function secondLargest(arr) {
+	var biggest = -Infinity;
+	var next_biggest = -Infinity;
+	
+	for (var i = 0, n = arr.length; i < n; ++i) {
+		var nr = +arr[i]; // convert to number first
+	
+		if (nr > biggest) {
+			next_biggest = biggest; // save previous biggest value
+			biggest = nr;
+		} else if (nr < biggest && nr > next_biggest) {
+			next_biggest = nr; // new second biggest value
+		}
+	}
+	return [biggest, next_biggest];
 }
 
 function arrayMerge(a, b) {
@@ -219,4 +250,16 @@ function getTileSize() {
 	var tileWidth = ((window.innerWidth - 15) / w) - (2 * borderWidth);
 	var tileHeight = ((window.innerHeight - 15) / h) - (2 * borderWidth);
 	return (tileWidth < tileHeight ? tileWidth : tileHeight) - (2 * outlineWidth);
+}
+
+// var rand = xoshiro128ss( 1, 2, 3, 4 );
+// rand(); // 0.7410467516165227
+function xoshiro128ss(a, b, c, d) {
+    return function() {
+        var t = b << 9, r = a * 5; r = (r << 7 | r >>> 25) * 9;
+        c ^= a; d ^= b;
+        b ^= c; a ^= d; c ^= t;
+        d = d << 11 | d >>> 21;
+        return (r >>> 0) / 4294967296;
+    }
 }
